@@ -1,0 +1,120 @@
+---
+global_id: eb9db60e
+title: defineDocumentType
+excerpt: Technical reference for defining a document's type schema.
+---
+
+`defineDocumentType`定义一种特定文档类型的架构，通常称为模型或内容类型。
+
+文档类型定义在[`makeSource`](/docs/reference/source-files/make-source)的选项中使用，这就是定义传递到 Contentlayer 的方式。
+
+## 用法
+
+```js
+const Doc = defineDocumentType(() => ({
+  name: 'Doc',
+  filePathPattern: '**/*.md',
+  fields: {
+    title: {
+      type: 'string',
+    },
+  },
+}))
+```
+
+## 选项
+
+### `name` (required)
+
+文档的名称。这定义了为此类型的文档生成的类型和函数。
+
+```js
+const Doc = defineDocumentType(() => ({
+  name: "Doc",
+  // ...
+})
+```
+
+在用法示例中，`name`是`Doc`，它将生成一个数据对象`allDocs`，表示所有匹配文档的集合（请参见`filePathPattern`）。它还将为`Doc`添加一个类型定义，表示根据内容创建的数据对象的形状。
+
+### `fields`
+
+字段定义确定文档类型的数据形状。有关详细信息，请参阅[字段类型参考](/docs/reference/source-files/field-types)。
+
+### `description`
+
+提供对生成的类型定义的描述。
+
+### `computedFields`
+
+计算字段可以即时计算，而不是直接从内容源读取。
+
+它们遵循与`fields`类似的模式（见上文），只是每个字段都有一个必需的`resolve`选项，这是一个解析字段值的函数。该函数接收一个参数，即文档对象。
+
+下面是一个示例，它内省文档的路径，并将`url_path`属性应用于文档。
+
+```js
+import { urlFromFilePath } from '../utils'
+
+export const Page = defineDocumentType(() => ({
+  // ...
+  fields: {
+    // ...
+  },
+  computedFields: {
+    url_path: {
+      type: 'string',
+      resolve: (doc) => doc._raw.flattenedPath.replace(/pages\/?/, ''),
+    },
+  },
+}))
+```
+
+### `filePathPattern`
+
+Path 相对于`makeSource`选项中指定的`contentDirPath`。使用 glob 模式来针对特定的文档子集。
+
+这也可以指向一个单独的文件，该文件将创建一个单例文档类型。有关详细信息，请参阅`isSingleton`选项。
+
+**实例:**
+
+这将递归地检索项目的`content`目录中所有扩展名为`.md`的文件。
+
+```js
+const Doc = defineDocumentType(() => ({
+  filePathPattern: '**/*.md',
+  // ...
+}))
+
+export default makeSource({
+  contentDirPath: 'content',
+  documentTypes: [Doc],
+})
+```
+
+### `contentType` (default: `markdown`)
+
+应该如何解析文件的主要内容区域。默认情况下，它被视为 Markdown。
+
+**选项:**
+
+- `markdown`: 将文件的内容区域解析为 markdown。
+- `mdx`: 允许使用[MDX](https://mdxjs.com/)在文件正文中。
+- `data`: 忽略文件的内容区域，只从 JSON 或 YAML 文件中获取前端内容。
+
+### `isSingleton` (default: `false`)
+
+默认情况下，Contentlayer 将抓取与`filePathPattern`匹配的任何文件。将文档类型设置为 singleton 意味着 Contentlayer 将获取单个文件并导出单个对象以供项目使用。
+
+**Example:**
+
+在本例中，Contentlayer 将导出一个`globalConfig`数据对象，其中包含来自`config/global.yaml`（在主内容目录内）的内容。对象的类型定义将与名称（`GlobalConfig`）匹配，就像在非单例类型中一样。
+
+```js
+defineDocumentType(() => ({
+  name: 'GlobalConfig',
+  filePathPattern: `config/global.yaml`,
+  isSingleton: true,
+  // ...
+}))
+```

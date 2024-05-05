@@ -1,0 +1,103 @@
+---
+global_id: fa487097
+title: makeSource
+excerpt: 当使用本地文件作为内容源时，makeSource为Contentlayer提供了架构和配置。
+---
+
+`makeSource`为 Contentlayer 提供应用程序的架构和配置。
+
+## Usage
+
+调用`makeSource`的代码应放在`contentlayer.config.js`中。
+
+```ts
+// contentlayer.config.js
+
+import { makeSource } from 'contentlayer-source-notion'
+
+export default makeSource({
+  /* options */
+})
+```
+
+## 选项
+
+<OptionsTable>
+  <OptionTitle>
+    ### `client`
+
+  </OptionTitle>
+  <OptionDescription>
+    The `@notionhq/client` instance used to query the Notion API.
+
+    **Example:**
+
+    ```js
+    import { Client } from '@notionhq/client'
+    import { makeSource } from 'contentlayer-source-notion'
+
+    const client = new Client({ auth: process.env.NOTION_TOKEN })
+
+    export default makeSource({
+      client,
+    })
+    ```
+
+    This would use `process.env.NOTION_TOKEN` when calling the Notion API.
+
+  </OptionDescription>
+  <OptionTitle>
+    ### `renderer`
+
+  </OptionTitle>
+  <OptionDescription>
+    The `@notion-render/client` instance used to transform Notion Block into HTML.
+
+    **Example:**
+
+    ```js
+    import { NotionRenderer } from '@notion-render/client'
+    import { makeSource } from 'contentlayer-source-notion'
+
+    const renderer = new NotionRenderer()
+
+    export default makeSource({
+      renderer
+    })
+    ```
+
+  </OptionDescription>
+  <OptionTitle>
+    ### `databaseTypes`
+    (required)
+
+  </OptionTitle>
+  <OptionDescription>
+    Your databases definitions for your project. See [`defineDatabase`](/docs/reference/source-notion/define-database) for usage.
+
+  </OptionDescription>
+  <OptionTitle>
+    ### `fieldOptions`
+
+  </OptionTitle>
+  <OptionDescription>
+    Provides the ability to manipulate how fields are written when parsing the content source.
+
+    **Options:**
+
+    - `bodyFieldName` (default: `body`): Name of the field containing the body/content extracted when the body type is `markdown` or `mdx`.
+    - `typeFieldName` (default: `type`): Name of the field containing the name of the document type.
+
+    **Example:**
+
+    ```js
+    export default makeSource({
+      fieldOptions: {
+        bodyFieldName: 'content',
+        typeFieldName: '__typename',
+      },
+    })
+    ```
+
+  </OptionDescription>
+</OptionsTable>

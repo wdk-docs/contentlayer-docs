@@ -1,0 +1,144 @@
+---
+global_id: e6e079ee
+title: 属性
+excerpt: 当使用本地文件作为内容源时，defineDatabase为Contentlayer提供了架构和配置。
+---
+
+属性配置允许您配置如何使用数据库属性来生成内容的形状和行为。
+
+## Usage
+
+### By using array
+
+```js
+const Post = defineDatabase(() => ({
+  name: 'Post',
+  databaseId: '<database_id>',
+  properties: [
+    {
+      key: 'metaDescription',
+      name: 'Short description',
+    },
+  ],
+}))
+```
+
+### 通过使用对象
+
+```js
+const Post = defineDatabase(() => ({
+  name: 'Post',
+  databaseId: '<database_id>',
+  properties: {
+    metaDescription: {
+      name: 'Short description',
+    },
+  },
+}))
+```
+
+## 共享选项
+
+<OptionsTable>
+  <OptionTitle>
+    ### `name|id`
+    `string` (required)
+  </OptionTitle>
+  <OptionDescription>
+    将此属性配置映射到数据库属性。您可以根据您的用例选择使用`id`或`name`。
+  </OptionDescription>
+  <OptionTitle>
+    ### `key`
+    `string`
+  </OptionTitle>
+  <OptionDescription>
+    定义架构中为此属性生成的字段名。
+
+    **实例:**
+
+    ```js
+    defineDatabase(() => ({
+      name: 'Post',
+      databaseId: '<databaseId>',
+      properties: [
+        {
+          key: 'metaDescription',
+          name: 'Short description'
+        }
+      ]
+    }))
+    ```
+
+    ```js
+    allPosts.forEach(
+      (post) => console.log(post.metaDescription)
+    )
+    ```
+
+  </OptionDescription>
+  <OptionTitle>
+    ### `required`
+    `boolean`
+  </OptionTitle>
+  <OptionDescription>
+    不会生成未定义此属性的页面。
+
+    默认为 `false`.
+
+  </OptionDescription>
+  <OptionTitle>
+    ### `description`
+    `string`
+  </OptionTitle>
+  <OptionDescription>
+    向编辑器简要描述如何使用字段。
+
+  </OptionDescription>
+</OptionsTable>
+
+## Relation property
+
+<OptionsTable>
+  <OptionTitle>
+    ### `type`
+    `'relation'` (required)
+  </OptionTitle>
+  <OptionDescription>
+    定义此属性的类型。
+  </OptionDescription>
+  <OptionTitle>
+    ### `relation`
+    `DatabaseType` (required)
+  </OptionTitle>
+  <OptionDescription>
+    关系的数据库定义。
+
+    **实例:**
+
+    ```js
+    const Category = defineDatabase(() => ({
+      name: 'Category',
+      databaseId: '<database_id>',
+    }))
+
+    const Post = defineDatabase(() => ({
+      name: 'Post',
+      databaseId: '<database_id>',
+      properties: {
+        category: {
+          type: 'relation',
+          name: 'Category',
+          relation: Category,
+        },
+      },
+    }))
+    ```
+
+  </OptionDescription>
+</OptionsTable>
+
+## 汇总属性
+
+汇总属性允许您聚合关系属性中定义的页面的属性（例如，平均数）。
+
+最酷的是，你只需要配置 relation 属性，一切都会自行运行！

@@ -1,0 +1,82 @@
+---
+global_id: e764dcd5
+title: 编写类型安全代码
+nav_title: 类型安全
+excerpt: 虽然不是必需的，但TypeScript是Contentlayer的一个重要部分。让我们说服你为什么。
+---
+
+将 TypeScript 与 Next.js 一起使用是可选的，但*强烈*建议使用，尤其是当您的 web 项目所使用的框架很好地支持它时。
+
+## 什么是 TypeScript？
+
+TypeScript 是 JavaScript 的语法扩展，编译器将 TypeScript 代码转换为纯 JavaScript。
+
+TypeScript 是一种工具，通过为代码提供类型安全性，帮助您更好、更强、更快地编写 JavaScript。
+
+### 了解类型安全
+
+JavaScript 执行所谓的*类型强制*。这意味着当您的代码运行时，它将被转换以避免失败。考虑以下内容：
+
+```js
+const a = '1'
+const b = 1
+const sum = a + b // => 11
+```
+
+因为 JavaScript 不能添加字符串和数字，所以它将`b`转换为字符串(`"1"`)，并使用加号运算符作为字符串串联运算符。因此：`"1" + 1`变为`"1" + "1"`。
+
+使用 TypeScript，我们可以声明`sum`应该是一个数字。
+
+```ts
+const a = '1'
+const b = 1
+const sum: number = a + b
+```
+
+当我们编译代码时，我们会被告知有问题。
+
+```txt
+Type 'string' is not assignable to type 'number'.
+```
+
+因此，我们可以*确信*，我们正在发送的代码正在做我们所期望的事情。
+
+## TypeScript 的优点
+
+随着网站的发展，将类型安全带到您的代码中**将增强您对发布新功能**的信心。
+
+尽管这是一个足够大的好处，可以保证使用 TypeScript，但这里还有一些额外的好处：
+
+- TypeScript 为代码编辑器（例如 VS code）带来了更强大的功能，可以帮助您在运行 TS 编译器之前捕获错误，并帮助内省对其他模块的类型期望，包括来自`node_modules`中的外部库的模块。
+- TypeScript 是完全可选的。与其强迫你在任何地方都使用它，你可以确定你在哪里需要它。
+- 因为它的使用是可选的，所以也很容易上手。你可以稍微使用 TypeScript，直到你感到更加自信。
+
+## 将 TypeScript 与 Contentlayer 一起使用
+
+使用 TypeScript 可以最大限度地利用 Contentlayer。Contentlayer 自动为转换后的内容生成类型定义。不需要额外的工作或配置。
+
+因为 Contentlayer 将转换后的内容缓存为本地 JSON 数据，所以您可以确信导入到页面中的数据是您所期望的形状。
+
+考虑这个例子：
+
+```ts
+import { allPosts } from 'contentlayer/generated'
+
+export async function getStaticProps({ params }) {
+  const post = allPosts.find((post) => post._raw.flattenedPath === params.slug)
+  return { props: { post } }
+}
+```
+
+这*似乎*应该很好，因为你引入了单一类型的内容。但您可以通过使用 TypeScript 绝对确定：
+
+```ts
+import { allPosts, Post } from 'contentlayer/generated'
+
+export async function getStaticProps({ params }) {
+  const post: Post = allPosts.find((post) => post._raw.flattenedPath === params.slug)
+  return { props: { post } }
+}
+```
+
+还有一个额外的好处，如果使用像 VS code 这样的 TS 友好的代码编辑器，您将自动获得关于组件中`post`上可用属性的建议。当你的类型出现问题时，你也会立即得到反馈。

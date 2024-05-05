@@ -1,0 +1,57 @@
+---
+global_id: eeeb4ab5
+title: defineNestedType
+excerpt: Technical reference for defining a nested document type schema.
+---
+
+`defineNestedType`定义可嵌入文档中的可重用数据形状的架构。
+
+嵌套类型是在文档类型定义中定义的，因此不必包含在[`makeSource`选项](/docs/reference/source-files/make-source)中.
+
+## Usage
+
+```js
+const SEO = defineNestedType(() => ({
+  name: 'SEO',
+  fields: {
+    title: {
+      type: 'string',
+    },
+  },
+}))
+
+const Doc = defineDocumentType(() => ({
+  name: 'Doc',
+  filePathPattern: '**/*.md',
+  fields: {
+    // ...
+    seo: {
+      type: 'nested',
+      of: SEO,
+    },
+  },
+}))
+```
+
+## Options
+
+### `name` (required)
+
+文档的名称。这定义了为此类型的文档生成的类型和函数。
+
+```js
+const SEO = defineNestedType(() => ({
+  name: "SEO",
+  // ...
+})
+```
+
+因为嵌套类型不是文档，所以它们不会作为单独的数据文件导出。但仍将生成类型定义（在使用示例中为`SEO`）。
+
+### `fields`
+
+字段定义确定文档类型的数据形状。有关详细信息，请参阅[字段类型参考](/docs/reference/source-files/field-types)。
+
+### `description`
+
+提供对生成的类型定义的描述。

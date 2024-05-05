@@ -1,0 +1,38 @@
+---
+global_id: b1141d65
+title: Stackbit
+excerpt: Stackbit是一个可组合的可视化编辑器，支持多个内容源和站点框架。
+label: Experimental
+collapsible: true
+collapsed: true
+show_child_cards: true
+---
+
+Stackbit 是一个可组合的可视化编辑器，支持多个内容源和站点框架。
+
+![使用Stackbit进行可视化编辑](/images/stackbit-visual-editing.gif)
+
+Contentlayer 可以在启用了 Stackbit 的网站中使用，以简化开发人员在其组件和页面中处理内容的过程。
+
+Contentlayer 提供了一种[将 Stackbit 配置转换为 Contentlayer 配置](/docs/integrations/stackbit/config)的方法，因此您只需在一个位置定义内容的形状。
+
+## 它的工作原理
+
+安装了适当的软件包后，该过程如下所示:
+
+1. 使用[Stackbit 的`models'属性](https://docs.stackbit.com/reference/config/content-modeling/models)定义文档的形状.
+2. 将 Stackbit 配置对象导入到 Contentlayer 配置文件中。
+3. 扩展任何必要的属性以支持您的代码。
+4. 配置 Contentlayer 源。
+
+See below for an example, and also view [the API reference](/docs/integrations/stackbit/config) for specific usage details.
+
+## Example Project
+
+If you'd like to see this in process, check out [this example project](https://github.com/stackbit-themes/stackbit-examples/tree/main/contentlayer), which integrates Stackbit and Contentlayer in a Next.js site.
+
+The README file has setup information, but we recommend reading through the tutorial below to understand how the pieces fit together.
+
+## Stackbit Guides
+
+The following docs will get you started integrating Stackbit and Contentlayer into your Next.js project.

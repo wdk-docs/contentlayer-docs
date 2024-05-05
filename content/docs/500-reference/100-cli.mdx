@@ -1,0 +1,77 @@
+---
+global_id: e9e2f788
+title: Contentlayer CLI
+nav_title: CLI
+excerpt: 在命令行上使用Contentlayer。
+---
+
+Contentlayer CLI 使您能够将内容转换为数据。
+
+## 用法
+
+```txt
+contentlayer <command> [options]
+```
+
+要获得所有命令的列表，可以使用`--help`标志运行`contentlayer`：
+
+```txt
+contentlayer --help
+```
+
+这将产生如下输出：
+
+```txt
+━━━ Contentlayer CLI - 0.0.34 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  $ contentlayer <command>
+
+━━━ General commands ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  contentlayer build [-c,--config #0] [--clearCache] [--verbose]
+    Transforms your content into static data
+
+  contentlayer dev [-c,--config #0] [--clearCache] [--verbose]
+    Same as "contentlayer build" but with watch mode
+
+You can also print more details about any of these commands by calling them
+with the `-h,--help` flag right after the command name.
+```
+
+## 命令
+
+### `build`
+
+```txt
+contentlayer build [options]
+```
+
+将内容转换为页面和组件可以使用的数据对象。这些对象被写入`.contentlayer/generated`目录中的文件。
+
+### `dev`
+
+```txt
+contentlayer dev [options]
+```
+
+运行生成，然后侦听对内容文件的更改，并在每次更改后重新生成。
+
+## 选项
+
+以下选项可与每个命令一起运行。
+
+### `config` (alias: `-c`)
+
+使用自定义配置文件路径。默认情况下，`contentlayer.config.ts`和`contentlayer.config.js`都可以工作。
+
+### `clearCache`
+
+在运行指定的命令之前，清除`.contentlayer/generated`目录。
+
+### `verbose`
+
+在运行命令时添加更详细的输出。
+
+### `help`
+
+生成 CLI 的使用说明和选项。不需要关联的命令。

@@ -1,0 +1,262 @@
+---
+global_id: cddd76b7
+title: 入门
+excerpt: 通过展示我们如何使用Next.js快速构建博客网站，了解Contentlayer的基本知识。
+---
+
+本教程将通过演练如何使用 Next.js 构建一个简单的博客网站，让您熟悉 Contentlayer 的基本知识。
+
+博客将包括一个带有标题、正文和日期的帖子列表，并在顶部显示最近的帖子。每个帖子都有自己的页面。
+
+<div className="mt-8 grid gap-6 md:grid-cols-2">
+  <Card title="现在就试试" icon="gitpod" link={{url: 'http://gitpod.io/#https://github.com/contentlayerdev/next-contentlayer-example', label: '在Gitpod中试用'}}>
+    如果你想直接进入并开始玩Contentlayer，你可以在Gitpod中打开这个项目。
+
+  </Card>
+  <Card title="示例项目" icon="github" link={{url: 'https://github.com/contentlayerdev/next-contentlayer-example', label: '参见示例'}}>
+    您可以在[此状态](https://github.com/contentlayerdev/next-contentlayer-example/tree/bca4b7884f5cad8963e631a2f24a19200c106495)中找到本教程的工作版本示例项目的。
+
+    有关示例的完整列表，请参见[示例页面](/examples)。
+
+  </Card>
+</div>
+
+## 1. 设置项目
+
+为了演示我们可以多快地开始工作，让我们从一个新的空白 Next.js 项目开始。
+
+```txt
+npx create-next-app@latest --typescript --tailwind --experimental-app --eslint contentlayer-example
+```
+
+回答出现的任何提示，然后切换到新的`contentlayer-example`目录。
+
+```txt
+cd contentlayer-example
+```
+
+### 再进行
+
+安装 Contentlayer 和 Next.js 插件，以及日期帮助程序包。
+
+```txt
+npm install contentlayer next-contentlayer date-fns
+```
+
+### Next.js 配置
+
+要将 Contentlayer 挂接到`next dev`和`next build`进程中，您需要使用`withContentlayer`方法包装 next.js 配置。
+
+```js
+// next.config.js
+const { withContentlayer } = require('next-contentlayer')
+
+/** @type {import('next').NextConfig} */
+const nextConfig = { reactStrictMode: true, swcMinify: true }
+
+module.exports = withContentlayer(nextConfig)
+```
+
+### TypeScript 配置
+
+然后将以下行添加到`tsconfig.json`或`jsconfig.json`文件中：
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    //  ^^^^^^^^^^^
+    "paths": {
+      "contentlayer/generated": ["./.contentlayer/generated"]
+      // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".contentlayer/generated"
+    // ^^^^^^^^^^^^^^^^^^^^^^
+  ]
+}
+```
+
+这将配置 Next.js 构建过程和编辑器，以了解在哪里查找生成的文件，并使其更容易导入到代码中。
+
+### 忽略生成输出
+
+将`.contentlayer`目录添加到`.gitignore`文件中，以确保应用程序的每个构建都有最新生成的数据，并且不会遇到 Git 问题。
+
+```bash
+# .gitignore
+
+# ...
+
+# contentlayer
+.contentlayer
+```
+
+## 2. 定义内容架构
+
+让我们定义我们的内容模式，并向我们的网站添加一些内容。
+
+### 添加 Contentlayer 配置
+
+因为我们正在构建一个简单的博客网站，所以让我们定义一个名为`Post`的文档类型。在项目的根目录中创建一个文件`contentlayer.config.ts`，并添加以下内容。
+
+```js
+// contentlayer.config.ts
+import { defineDocumentType, makeSource } from 'contentlayer/source-files'
+
+export const Post = defineDocumentType(() => ({
+  name: 'Post',
+  filePathPattern: `**/*.md`,
+  fields: {
+    title: { type: 'string', required: true },
+    date: { type: 'date', required: true },
+  },
+  computedFields: {
+    url: { type: 'string', resolve: (post) => `/posts/${post._raw.flattenedPath}` },
+  },
+}))
+
+export default makeSource({ contentDirPath: 'posts', documentTypes: [Post] })
+```
+
+此配置指定一个名为`Post`的文档类型。这些文档应该是位于项目中`posts`目录中的 Markdown 文件。
+
+从这些文件生成的任何数据对象都将包含上面指定的字段，以及包含文件的原始内容和 HTML 内容的`body`字段。`url`字段是一个特殊的计算字段，它会根据源文件的元属性自动添加到所有发布文档中。
+
+### 添加 Post 内容
+
+在`posts`目录中创建一些标记文件，并向这些文件中添加一些内容。
+
+下面是一个位于`posts/poster-01.md`的 post 文件的示例：
+
+```txt
+---
+title: My First Post
+date: 2021-12-24
+---
+
+Ullamco et nostrud magna commodo nostrud ...
+```
+
+下面的例子将在这个结构中有三个员额：
+
+```txt
+posts/
+├── post-01.md
+├── post-02.md
+└── post-03.md
+```
+
+## 3. 添加站点代码
+
+现在，我们可以通过将数据放入我们的页面来将所有内容联系在一起。
+
+### 替换主页
+
+将默认主页(`app/page.tsx`)替换为所有帖子的列表以及指向各个帖子页面的链接。请注意，在尝试从`contentlayer/generated`导入时会出现错误，这是正常的，但我们稍后将通过运行开发服务器来修复它。
+
+```jsx
+// app/page.tsx
+import Link from 'next/link'
+import { compareDesc, format, parseISO } from 'date-fns'
+import { allPosts, Post } from 'contentlayer/generated'
+
+function PostCard(post: Post) {
+  return (
+    <div className="mb-8">
+      <h2 className="mb-1 text-xl">
+        <Link href={post.url} className="text-blue-700 hover:text-blue-900 dark:text-blue-400">
+          {post.title}
+        </Link>
+      </h2>
+      <time dateTime={post.date} className="mb-2 block text-xs text-gray-600">
+        {format(parseISO(post.date), 'LLLL d, yyyy')}
+      </time>
+      <div className="text-sm [&>*]:mb-3 [&>*:last-child]:mb-0" dangerouslySetInnerHTML={{ __html: post.body.html }} />
+    </div>
+  )
+}
+
+export default function Home() {
+  const posts = allPosts.sort((a, b) => compareDesc(new Date(a.date), new Date(b.date)))
+
+  return (
+    <div className="mx-auto max-w-xl py-8">
+      <h1 className="mb-8 text-center text-2xl font-black">Next.js + Contentlayer Example</h1>
+      {posts.map((post, idx) => (
+        <PostCard key={idx} {...post} />
+      ))}
+    </div>
+  )
+}
+```
+
+请注意，我们将流程发布数据直接导入到页面组件中。然后，我们对`allPosts`进行排序，以按时间倒序对帖子进行排序，并呈现一系列卡片组件。
+
+### 运行应用程序
+
+运行 Next.js 开发服务器。
+
+```txt
+npm run dev
+```
+
+并访问 localhost:3000 在主页上查看文章提要。
+
+### 添加 Post 布局
+
+现在，点击帖子会导致 404 错误。让我们来解决这个问题！
+
+在`app/posts/[slug]/page.tsx`处创建页面，并添加以下代码。
+
+```jsx
+// app/posts/[slug]/page.tsx
+import { format, parseISO } from 'date-fns'
+import { allPosts } from 'contentlayer/generated'
+
+export const generateStaticParams = async () => allPosts.map((post) => ({ slug: post._raw.flattenedPath }))
+
+export const generateMetadata = ({ params }: { params: { slug: string } }) => {
+  const post = allPosts.find((post) => post._raw.flattenedPath === params.slug)
+  if (!post) throw new Error(`Post not found for slug: ${params.slug}`)
+  return { title: post.title }
+}
+
+const PostLayout = ({ params }: { params: { slug: string } }) => {
+  const post = allPosts.find((post) => post._raw.flattenedPath === params.slug)
+  if (!post) throw new Error(`Post not found for slug: ${params.slug}`)
+
+  return (
+    <article className="mx-auto max-w-xl py-8">
+      <div className="mb-8 text-center">
+        <time dateTime={post.date} className="mb-1 text-xs text-gray-600">
+          {format(parseISO(post.date), 'LLLL d, yyyy')}
+        </time>
+        <h1 className="text-3xl font-bold">{post.title}</h1>
+      </div>
+      <div className="[&>*]:mb-3 [&>*:last-child]:mb-0" dangerouslySetInnerHTML={{ __html: post.body.html }} />
+    </article>
+  )
+}
+
+export default PostLayout
+```
+
+再次注意，我们正在从`contentlayer/generated`导入数据。这就是 Contentlayer 的美妙之处。现在，点击主页上的帖子链接，您将进入一个工作的帖子页面。
+
+## 接下来的步骤
+
+您现在有了一个简单的博客网站，其中包含 Next.js 和 Contentlayer！
+
+这仅仅是一个开始。现在，您可以使用 Contentlayer 挖掘并添加所有必要的功能，以构建一个内容丰富的网站。以下是一些建议：
+
+- 跳转到[概念指南](/docs/concepts)以了解有关[内容层如何工作](/docs/concepts/how-contentlayer-works)的更多信息.
+- [加入我们的 Discord 社区](https://discord.gg/rytFErsARm)要提问，请随时了解最新情况，并分享您的工作。
+- 查看[示例](/examples)，了解如何使用 Contentlayer。
+- 浏览[本地文件源指南](/docs/sources/files)以了解特定技术。

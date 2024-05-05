@@ -1,0 +1,88 @@
+---
+global_id: d7093dfb
+title: 将Contentlayer与其他工具进行比较
+nav_title: 内容层与X
+excerpt: 通过与您熟悉的工具进行比较，更好地了解Contentlayer及其适用范围。
+---
+
+我们经常被问及 Contentlayer 如何适应某些特定的 web 项目。通过将 Contentlayer 与现有框架进行比较，我们发现在项目中更容易对 Contentlayer 所扮演的角色进行上下文化。
+
+以下部分介绍了一些常见的比较，按框架、内容处理器和内容源进行了分类。一般来说，Contentlayer 更多的是对框架和源代码的补充，而不是竞争对手。最直接的比较出现在内容处理器中。
+
+## 框架
+
+Contentlayer 不是一个框架。它是一个处理内容的工具。然而，在现有框架的上下文中考虑 Contentlayer 可能会有所帮助，以更好地了解 Contentlayer 如何适应您的项目。
+
+### Gatsby vs Contentlayer
+
+[Gatsby](https://www.gatsbyjs.com/)是一个灵活的框架，使用 GraphQL 层和丰富的插件生态系统将内容加载到使用 React 组件构建的页面中。
+
+在某种程度上，Contentlayer 就像采用了 Gatsby 的 GraphQL 引擎，并允许它与 Next.js 等其他框架一起使用。除了在现代框架中的可移植性之外，Contentlayer 与 Gatsby 的 GraphQL 解决方案相比还有几个优势：
+
+- Gatsby 要求您了解 GraphQL。Contentlayer 只是 JavaScript。
+- 本地 Markdown 文件不能用 Gatsby 建模为单独的类型，而 Contentlayer 提供了对结构化内容模式的完全控制。
+- Contentlayer 自动为您的内容生成 TypeScript 类型定义。
+
+### Jekyll vs Contentlayer
+
+[Jekyll](https://jekyllrb.com/)是一个用 Ruby 编写的静态站点生成器。它解析本地内容文件，并将它们通过 Liquid 模板生成静态 HTML 页面。
+
+Contentlayer 可以被认为是 Jekyll 的补充，而不是竞争，因为 Contentlayer 是处理内容的工具。然而，由于 Jekyll 对如何通过其系统提供内容有强烈的意见，因此将 Contentlayer 与 Jekyll 一起用于本地内容可能没有好处。它更适合从无头 CMS 中获取远程内容，尽管我们没有为此优化 Contentlayer。
+
+Jekyll 对其处理内容的方式固执己见，因此限制了您对内容的处理。Contentlayer 无助于克服 Jekyll 的局限性。这通常需要转向一个更现代、更强大的框架。
+
+### Hugo vs Contentlayer
+
+[Hugo](https://gohugo.io/)是一个像 Jekyll 一样的静态站点生成器，但它是用 Go 编写的，是为速度而设计的。
+
+像 Jekyll 一样，Contentlayer 可以被认为是对 Hugo 的补充，但不经常一起使用。通常，Contentlayer 与 Next.js 等更现代的框架配对，而那些使用 Hugo 的框架则受到 Hugo 对内容处理的意见的限制。
+
+### Next.js vs Contentlayer
+
+Contentlayer 针对 Next.js 进行了优化。我们设想它将成为 Next.js 项目中管理内容的首选工具。
+
+### Remix vs Contentlayer
+
+Contentlayer 是一种用于将内容处理到 JavaScript 框架中的工具。我们相信它将成为 Remix 的首选内容解决方案。[我们目前正在考虑支持混音](/docs/environments/remix).
+
+### SvelteKit vs Contentlayer
+
+Contentlayer 是一种用于将内容处理到 JavaScript 框架中的工具。我们相信它将成为 SveltKit 的首选内容解决方案。[我们目前正在考虑支持 SveltKit](/docs/environments/svelte).
+
+### Astro vs Contentlayer
+
+Contentlayer 是一种用于将内容处理到 JavaScript 框架中的工具。我们相信它将成为 Astro 的首选内容解决方案。[我们目前正在考虑 Astro 的支持](/docs/environments/astro).
+
+## 内容处理器
+
+在内容处理工具中可以找到更直接的比较。
+
+### next-mdx-remote vs Contentlayer
+
+[next-mdx-remote](https://github.com/hashicorp/next-mdx-remote)是一组帮助在 Next.js 项目中使用 MDX 的实用程序。这些实用程序功能强大，在 Contentlayer 之前，它们是在 Next.js 项目中使用 MDX 的一个很好的解决方案。
+
+`next-mdx-remote`停止的地方是它不处理从本地或远程源加载内容。Contentlayer 将从源文件加载内容，并且还支持 MDX。Contentlayer 还自动生成 TypeScript 类型定义，以确保正在处理的内容具有您所期望的形状，而`next-mdx-remote`无法处理该状态。
+
+### mdx-bundler vs Contentlayer
+
+[mdx-bundler](https://github.com/kentcdodds/mdx-bundler)是用于捆绑 MDX 内容的解决方案。它类似于 next-mdx-remote，但可以处理绑定导入。
+
+和 next-mdx-remote 一样，mdx-bundler 只关心处理内容，不知道内容的来源。Contentlayer 为使用现代框架构建的项目提供了完整的内容解决方案。
+
+## 内容源
+
+使用 Contentlayer，您的内容可以来自任何地方，无论是本地还是远程。我们才刚刚开始，并计划在不久的将来添加一些远程源。
+
+正因为如此，Contentlayer 通常可以被认为是对当今大多数无头 API 驱动解决方案的补充。
+
+### Contentful vs Contentlayer
+
+我们认为 Contentlayer 是对 Contentful 的补充。事实上，我们目前正在探索将 Contentful 作为第一个受支持的远程源。[了解有关内容集成的更多信息](/docs/sources/contentful).
+
+### Sanity vs Contentlayer
+
+我们认为 Contentlayer 是对 Sanity 的补充。事实上，我们目前正在探索使 Sanity 成为第一个受支持的远程源。[了解有关 Sanity 集成的更多信息](/docs/sources/sanity).
+
+### Notion vs Contentlayer
+
+我们认为 Contentlayer 是对 Notion 的补充。事实上，我们目前正在探索使 Notion 成为第一个受支持的远程源。[了解有关 Notion 集成的更多信息](/docs/sources/notion).

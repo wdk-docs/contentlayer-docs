@@ -1,0 +1,104 @@
+---
+global_id: bf100a10
+title: 将文档映射到文档类型
+nav_title: 将文档映射到类型
+excerpt: Contentlayer如何确定和设置每个文档的类型。
+---
+
+Contentlayer 按以下顺序解析每个文档的*type*:
+
+1. 文档上的显式`type`字段。
+2. 匹配文档类型的`filePathPattern`。
+
+## 显式指定文档类型
+
+任何文档都可以显式声明其类型。为此，请在文档中添加一个名为`type`的字段，并使用文档类型定义中的`name`选项。有关所有文档类型选项，请参见[此处](<(/docs/reference/source-files/define-document-type)>)。
+
+请考虑以下架构（文档类型）定义：
+
+```js
+defineDocumentType(() => ({
+  name: 'Post',
+  filePathPattern: `posts/**/*.mdx`,
+  // ...
+}))
+```
+
+此定义的名称为`Post`。因此，在内容文件中，可以直接指定`Post`类型，如下所示（在 markdown 中）：
+
+```yaml
+---
+title: '...'
+type: Post
+# ...
+---
+```
+
+### 具有多种类型的并置文档
+
+当同一目录中有多个类型时，在文档上显式定义类型会很方便。在这种情况下，可能有多个文档类型定义共享相同的`filePathPattern`选项。
+
+假设您有页面和帖子，但您希望它们都位于同一目录中。您的配置可能如下所示：
+
+```js
+const Page = defineDocumentType(() => ({
+  name: 'Page',
+  filePathPattern: `**/*.md`,
+  // ...
+}))
+
+const Post = defineDocumentType(() => ({
+  name: 'Post',
+  filePathPattern: `**/*.md`,
+  // ...
+}))
+```
+
+在这种情况下，无论将页面或帖子放在哪里，都需要显式指定类型。
+
+```yaml
+---
+title: Home Page
+type: Page
+# ...
+```
+
+### Staying True to `filePathPattern`
+
+请注意，无论是否在单个文档上显式定义类型，都应始终使用该文档类型定义的`filePathPattern`选项。
+
+按照上面的示例，如果您已将`filePathPattern`指定为`posts/**/*.mdx`，并将类型指定为`Post`，则不希望将`Post`类型的文档放置在`posts`之外或没有`.mdx`文件扩展名的目录中。如果您这样做，Contentlayer 可能不会处理该文件。
+
+```txt
+/
+├── posts/
+|   └── put Post documents here ...
+└── pages/
+    └── not here ...
+```
+
+## 使用`filePathPattern`解析文档类型
+
+当内容目录只包含一种类型的文档时，可以通过为文档类型定义提供唯一的`filePathPattern`选项来避免显式指定类型。
+
+例如，考虑一个只放在`posts`目录中的`Post`文档类型，该目录永远不会包含任何其他类型。该目录中的所有内容都将自动解释为`Post`对象，即使没有明确说明。
+
+如果这是我们的定义:
+
+```js
+const Post = defineDocumentType(() => ({
+  name: 'Post',
+  filePathPattern: `posts/**/*.md`,
+  // ...
+}))
+```
+
+那么 Contentlayer 的解释是这样的:
+
+```txt
+/
+├── posts/
+|   └── assumed to be Post documents
+└── pages/
+    └── no Post documents here
+```

@@ -1,0 +1,105 @@
+---
+global_id: dcf8e39e
+title: Next.js
+excerpt: 使用next-contentlayer插件将内容层紧密集成到next.js项目中。
+---
+
+Contentlayer 完全支持 Next.js 项目，包括实时重新加载（如果您遵循下面推荐的方法）。
+
+## 安装和配置
+
+如果您使用[`next-contentlayer`](/docs/reference/next-contentlayer)插件，那么在 Next.js 项目中使用 Contentlayer 是最简单的。安装插件：
+
+```txt
+npm install next-contentlayer
+```
+
+然后在[`withContentlayer` 实用程序](/docs/reference/next-contentlayer#withcontentlayer)中包装下一个配置对象.
+
+```js
+// next.config.js
+import { withContentlayer } from 'next-contentlayer'
+export default withContentlayer({})
+```
+
+## 应用程序目录
+
+Contentlayer 现在经过优化，可与`应用程序`目录中的 React 服务器组件（RSC）一起使用，该目录在 Next 13 中引入。在[下一个测试版文档](https://nextjs.org/docs/app/api-reference/file-conventions/metadata)中了解更多信息.
+
+### 服务器与客户端组件
+
+此时，我们建议将 Contentlayer 与服务器组件一起使用。
+
+将 Contentlayer 数据与[客户端组件](https://nextjs.org/docs/getting-started/react-essentials#client-components)一起使用可能需要用户从整个页面下载数据。除非解决了需要 Contentlayer 的特定需求，否则我们建议使用服务器组件。
+
+### Contentlayer Beta
+
+Contentlayer 和 Next.js 13 目前都处于测试版。这意味着可能存在我们尚未解释的边缘案例。如果您遇到任何问题，请[打开一个问题](https://github.com/contentlayerdev/contentlayer/issues/new).
+
+我们建议使用这两个软件包的最新测试版，以了解任何已解决的问题。
+
+[加入 Discord 社区](https://discord.gg/rytFErsARm)讨论您遇到的任何问题，并了解最新进展和发布。
+
+### 已知问题
+
+在`app`目录中使用 Contentlayer 存在一些已知问题：
+
+- 在客户端组件中调用`cache()`时出现无限循环问题。[请参阅此处](https://github.com/vercel/next.js/issues/42180#issuecomment-1303451294)
+- 使用 Yarn PnP 时生成失败。[请参阅此处](https://github.com/vercel/next.js/issues/42427)
+
+## 使用图像
+
+目前不支持使用 Contentlayer 进行图像处理，尽管我们正在计划使用它。目前的建议是将图像放在`public`目录中，然后使用`string`字段来存储该图像的路径。
+
+或者，您可以将图像存储在 Cloudinary 或 Imgix 等资产服务中。[请参阅此处了解更多详细信息](/docs/sources/files/images)关于我们当前的图像处理建议。
+
+### 在正文内容中使用 next/image
+
+如果要使用`next/image`来渲染图像，请创建一个组件来包装`next/iimage`，并通过 markdown 或 MDX 文件中的组件标记添加图像。
+
+例如，假设我们的项目中有一个`Image`组件，它封装了`next/Image`。
+
+```jsx
+import NextImage from 'next/image'
+
+const Image = (props) => {
+  return <NextImage /* ... */ />
+}
+```
+
+然后，您的内容应该直接调用此组件。
+
+```md
+Other markdown content ...
+
+<Image src="..." />
+```
+
+您可以使用`.mdx`文件自动处理此内容，也可以使用带有原始 markdown 的工具，如[`markdown-to-jsx`](https://www.npmjs.com/package/markdown-to-jsx)。
+
+## 内容实时重新加载 (HMR)
+
+当使用`next-contentlayer`插件并直接在页面应用程序/组件中导入您的内容（例如`import { allPosts } from 'contentlayer/generated'`）时，内容实时重载应该可以使用 Next.js 开箱即用。
+
+然而，在某些情况下（由于 Next.js 中的错误），您可能需要将以下挂钩添加到您的应用程序/页面组件：
+
+```tsx
+import { useLiveReload } from 'next-contentlayer/hooks'
+import { allPosts } from 'contentlayer/generated'
+
+export function MyPage() {
+  useLiveReload() // 这只在开发过程中运行，对生产没有影响
+
+  return <div>Your app</div>
+}
+```
+
+## 使用 TypeScript
+
+在 Next.js 中使用 TypeScript 是可选的，但[我们*强烈*建议](/docs/concepts/type-safety).
+
+Next.js 与 TypeScript 配合使用非常好。 [他们的文档](https://nextjs.org/docs/basic-features/typescript)展示了如何将 TypeScript 添加到新项目和现有项目中。它还列出了 Next.js 提供的有用类型。
+
+### 使用 Preact
+
+Preact 可以与自定义 Webpack 配置一起使用。有关详细信息，请参阅[本期 GitHub 文章](https://github.com/contentlayerdev/contentlayer/issues/62)。

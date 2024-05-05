@@ -1,0 +1,68 @@
+---
+global_id: fbb47906
+title: 远程文件
+label: 实验的
+excerpt: 如何将Contentlayer与远程文件一起用作内容源（例如Git repo）
+---
+
+远程文件源的行为与[文件源](/docs/sources/files)非常相似，不同之处在于内容文件可以位于网站文件夹之外。使用远程文件源 Contentlayer 将自动**将远程文件源中的内容文件同步到本地网站文件夹**，然后使用常规文件源进行处理。
+
+常见的远程文件源，包括其他 Git 存储库、数据库、API 或任何其他内容来源。
+
+## 示例：远程 Git 存储库
+
+请参阅[此处的完整示例](https://github.com/contentlayerdev/contentlayer/tree/main/examples/node-script-remote-content).
+
+```ts
+// NOTE we're using the `defineDocumentType` from the regular files source
+import { defineDocumentType } from '@contentlayer/source-files'
+import { spawn } from 'node:child_process'
+import { makeSource } from '@contentlayer/source-remote-files'
+
+const Post = defineDocumentType(() => ({
+  name: 'Post',
+  filePathPattern: `docs/**/*.md`,
+  fields: {
+    title: { type: 'string', required: false },
+  },
+}))
+
+const syncContentFromGit = async (contentDir: string) => {
+  const syncRun = async () => {
+    const gitUrl = 'https://github.com/vercel/next.js.git'
+    // TODO: git pull or git clone (see full example for working code)
+  }
+
+  let wasCancelled = false
+  let syncInterval
+
+  const syncLoop = async () => {
+    await syncRun()
+
+    if (wasCancelled) return
+
+    syncInterval = setTimeout(syncLoop, 1000 * 60)
+  }
+
+  // Block until the first sync is done
+  await syncLoop()
+
+  return () => {
+    wasCancelled = true
+    clearTimeout(syncInterval)
+  }
+}
+
+export default makeSource({
+  syncFiles: syncContentFromGit,
+  contentDirPath: 'nextjs-repo',
+  contentDirInclude: ['docs'],
+  documentTypes: [Post],
+  disableImportAliasWarning: true,
+})
+```
+
+## 笔记
+
+- 建议将同步内容目录添加到`.gitignore`文件中
+- 可以组合常规文件源和远程文件源。您必须使用相同的根目录`contentDirPath`，并将相应的内容放在不同的子目录中。

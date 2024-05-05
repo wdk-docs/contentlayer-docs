@@ -1,0 +1,239 @@
+---
+global_id: a5ba4922
+title: makeSource
+excerpt: 当使用本地文件作为内容源时，makeSource为Contentlayer提供了架构和配置。
+---
+
+`makeSource`为 Contentlayer 提供应用程序的架构和配置。
+
+## 用法
+
+调用`makeSource`的代码应放在`contentlayer.config.js`中。
+
+```ts
+// contentlayer.config.js
+
+import { makeSource } from '@contentlayer/source-files'
+
+export default makeSource({
+  /* options */
+})
+```
+
+## Options
+
+<OptionsTable>
+  <OptionTitle>
+    ### `contentDirPath`
+    (required)
+
+  </OptionTitle>
+  <OptionDescription>
+    内容所在位置的路径，相对于项目的根。
+
+    **实例:**
+
+    ```js
+    export default makeSource({
+      contentDirPath: 'content',
+    })
+    ```
+
+    这将从项目中的`content`目录加载内容。
+
+  </OptionDescription>
+  <OptionTitle>
+    ### `contentDirInclude`
+
+  </OptionTitle>
+  <OptionDescription>
+    Contentlayer应包括的路径数组，条件如下：
+
+    - 它们可以是文件，也可以是目录。
+    - 路径需要相对于`contentDirPath`或绝对路径。
+    - 空数组表示将包括`contentDirPath`中的所有文件。
+    - 全局/通配符模式（例如使用`*`）还不受支持。
+
+    当您的内容分布在项目中的多个目录中时，这很有用。
+
+    **默认:** `[]`
+
+    **实例:**
+
+    这将仅针对`docs`目录中的内容，同时使用`contentDirExclude`的默认值（请参见下文）。
+
+    ```js
+    export default makeSource({
+      // ...
+      contentDirPath: '.',
+      contentDirInclude: ['docs'],
+    })
+    ```
+
+  </OptionDescription>
+  <OptionTitle>
+    ### `contentDirExclude`
+
+  </OptionTitle>
+  <OptionDescription>
+    Contentlayer应显式排除的路径数组，条件如下:
+
+    - **设置此选项将完全覆盖默认值。**
+    - 它们可以是文件，也可以是目录。
+    - 路径需要相对于`contentDirPath`或绝对路径。
+    - 空数组表示将包括`contentDirPath`中的所有文件。
+    - 全局/通配符模式（例如使用`*`）还不受支持。
+
+    当您想忽略主内容目录中的特定文件或目录时，这很有用。
+
+    **默认:** `['node_modules', '.git', '.yarn', '.cache', '.next', '.contentlayer', 'package.json', 'tsconfig.json']`
+
+    **实例:**
+
+    这只会忽略`content/internal-docs`目录，但会针对`content`目录中的所有其他内容文件。
+
+    ```js
+    export default makeSource({
+      // ...
+      contentDirPath: './content',
+      contentDirExclude: ['internal-docs'],
+    })
+    ```
+
+  </OptionDescription>
+  <OptionTitle>
+    ### `documentTypes`
+    (required)
+
+  </OptionTitle>
+  <OptionDescription>
+    您的项目的架构定义。有关用法，请参见[`defineDocumentType`](/docs/reference/source-files/define-document-type)。
+
+  </OptionDescription>
+  <OptionTitle>
+    ### `markdown`
+
+  </OptionTitle>
+  <OptionDescription>
+    指定[备注](https://remark.js.org/)和[重新键入](https://github.com/rehypejs/rehype)插件。
+
+    **选项:**
+
+    - `remarkPlugins`
+    - `rehypePlugins`
+
+    **实例:**
+
+    下面是一个使用[highlight.js](https://highlightjs.org/usage/) (不要忘记在某个地方添加css文件，例如从CDN).
+
+    ```js
+    import { makeSource } from '@contentlayer/source-files'
+    import highlight from 'rehype-highlight'
+
+    export default makeSource({
+      // ...
+      markdown: { rehypePlugins: [highlight] },
+    })
+    ```
+
+    **接管备注管道**
+
+    [引擎盖下](https://github.com/contentlayerdev/contentlayer/blob/2588c02e266289b8ef0a7ceccdeb804b045ad21a/packages/%40contentlayer/core/src/markdown/markdown.ts#L45)，Contentlayer使用自己的remark/retype管道，上面指定的插件添加在预设的插件之后（对于remark:`remarkFrontmatter`、`remarkParse`和`remark2rehype`，对于 rehype: `rehypeStringify`）。但是，如果您需要完全控制管道（例如，[将`allowDangerousHtml`添加到`remark2rehype`插件中，这样HTML就不会从markdown中剥离](https://github.com/contentlayerdev/contentlayer/issues/413)，可以指定函数而不是对象：
+
+    ```js
+    export default makeSource({
+      // ...
+      markdown: (builder) => {
+        builder.use(remarkFrontmatter)
+        builder.use(remarkParse)
+        // other remark plugins as you wish
+        builder.use(remark2rehype, { allowDangerousHtml: true })
+        // other rehype plugins as you wish
+        // rehype to html
+        builder.use(rehypeStringify)
+      }
+    })
+    ```
+
+  </OptionDescription>
+  <OptionTitle>
+    ### `mdx`
+
+  </OptionTitle>
+  <OptionDescription>
+    遵循与`markdown`选项相同的模式，但用于MDX处理。
+
+    **选项:**
+
+    - `remarkPlugins`
+    - `rehypePlugins`
+
+    **实例:**
+
+    ```js
+    import { makeSource } from '@contentlayer/source-files'
+    import highlight from 'rehype-highlight'
+
+    export default makeSource({
+      // ...
+      mdx: { rehypePlugins: [highlight] },
+    })
+    ```
+
+  </OptionDescription>
+  <OptionTitle>
+    ### `fieldOptions`
+
+  </OptionTitle>
+  <OptionDescription>
+    提供了在分析内容源时如何编写字段的功能。
+
+    **选项:**
+
+    - `bodyFieldName` (默认: `body`): 当正文类型为`markdown`或`mdx`时提取的包含正文/内容的字段的名称。
+    - `typeFieldName` (默认: `type`): 包含文档类型（或嵌套文档类型）名称的字段的名称。
+
+    **实例:**
+
+    ```js
+    export default makeSource({
+      fieldOptions: {
+        bodyFieldName: 'content',
+        typeFieldName: '__typename',
+      },
+    })
+    ```
+
+  </OptionDescription>
+  <OptionTitle>
+    ### `date`
+
+  </OptionTitle>
+  <OptionDescription>
+    指定日期选项。目前仅支持：
+
+    - `timezone`: 在分析日期时指定时区。基于[@marsnusw/date-fns-tz](https://github.com/marnusw/date-fns-tz#zonedtimetoutc).
+
+  </OptionDescription>
+  <OptionTitle>
+    ### `onSuccess`
+
+  </OptionTitle>
+  <OptionDescription>
+    在生成成功完成后运行的回调。它可以通过提供的异步`importData`方法访问所有内容。
+
+    **Example:**
+
+    ```ts
+    import { makeSource } from '@contentlayer/source-files'
+
+    export default makeSource({
+      onSuccess: async (importData) => {
+        const { allDocuments } = await importData()
+        console.log('allDocuments', allDocuments.length)
+      }
+    })
+    ```
+
+  </OptionDescription>
+</OptionsTable>

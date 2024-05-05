@@ -1,0 +1,73 @@
+---
+global_id: e6e7eb3a
+title: next-contentlayer
+excerpt: 在使用Next.js进行开发时，帮助改善体验。
+---
+
+Next.js 插件提供了帮助程序，用于改善开发人员在将 Contentlayer 与 Next.js 一起使用时的体验。
+
+## `withContentlayer`
+
+`withContentlayer`实用程序会自动将 Contentlayer 挂接到 Next.js 的`build`和`dev`进程中，这意味着您在运行或构建 Next..js 项目时不必担心使用 CLI。
+
+要启用它，请将以下内容添加到`next.config.js`文件中：
+
+```js
+// next.config.js
+
+import { withContentlayer } from 'next-contentlayer'
+
+export default withContentlayer({})
+```
+
+## `useMDXComponent`
+
+如果您在 Next.js 项目中使用 MDX，`useMDXComponent`可以轻松地在布局中呈现 MDX。
+
+以下是一个布局示例，该布局接收`slug`参数，然后使用它来检索文档并在页面上呈现 MDX。
+
+```jsx
+import { useMDXComponent } from 'next-contentlayer/hooks'
+import { allDocs } from 'contentlayer/generated'
+import Button from '../components/Button'
+
+const mdxComponents = {
+  Button,
+}
+
+export default function DocPage({ doc }) {
+  const MDXContent = useMDXComponent(doc.body.code)
+
+  return (
+    <div>
+      <h1>{doc.title}</h1>
+      <MDXContent components={mdxComponents} />
+    </div>
+  )
+}
+
+export const getStaticProps = ({ params: { slug } }) => {
+  const doc = allDocs.find((doc) => doc._raw.flattenedPath === slug)
+  return { props: { doc } }
+}
+```
+
+<Callout>请记住在配置中设置`contentType: 'mdx'`，以便[正确处理mdx文件](/docs/sources/files/mdx).</Callout>
+
+有关在项目中使用 MDX 的更全面的视图，请参阅[示例 Next.js 项目](https://github.com/contentlayerdev/next-contentlayer-example).
+
+## `createContentlayerPlugin`
+
+`createContentlayerPlugin`函数允许您将非默认配置选项添加到下一个内容层插件中。这不是一个常见的用途。有关典型用法，请参见[`withContentlayer`](#withContentlayer)。
+
+```js
+import { createContentlayerPlugin } from 'next-contentlayer'
+
+const withContentlayer = createContentlayerPlugin({
+  // Additional Contentlayer config options
+})
+
+export default withContentlayer({
+  // Your Next.js config...
+})
+```

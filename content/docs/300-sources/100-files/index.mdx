@@ -1,0 +1,55 @@
+---
+global_id: ae74398f
+title: 文件源
+nav_title: 文件夹
+collapsible: true
+collapsed: true
+excerpt: 使用本地文件作为内容源时使用Contentlayer的指南。
+---
+
+在 Contentlayer 中使用文件源意味着内容位于本地，与您的代码一起位于 web 项目存储库中。这些文件通常是 markdown 或 MDX 文件，但也可以是 JSON 或 YAML 语法中的内容。
+
+<div className="mt-8 grid gap-6 md:grid-cols-2">
+  <Card
+    title="入门"
+    icon="rocket"
+    link={{ url: '/docs/getting-started', label: '跳进去' }}
+    subtitle="我们的入门教程向您展示了如何在Next.js项目中使用本地内容。"
+  />
+  <div className="mt-2">
+    <p>当想要使用本地内容时，我们的入门教程是最好的起点。</p>
+    <p>它向您展示了如何在Next.js应用程序中使用本地标记文件。</p>
+  </div>
+</div>
+
+---
+
+## 本地源指南
+
+<div className="-mt-4 grid gap-6 md:grid-cols-2">
+  <div>本地资源指南将教您使用本地内容的关键方面。</div>
+  <div>
+    - <ChevronLink label="Mapping Documents to Types" url="/docs/sources/files/mapping-document-types" />
+    - <ChevronLink label="Generated Data" url="/docs/sources/files/generated-data" />
+    - <ChevronLink label="Generated Type Definitions" url="/docs/sources/files/generated-types" />
+    - <ChevronLink label="Using MDX" url="/docs/sources/files/mdx" />
+    - <ChevronLink label="Working with Images" url="/docs/sources/files/images" />
+  </div>
+</div>
+
+---
+
+## API 参考
+
+<div className="-mt-4 grid gap-6 md:grid-cols-2">
+  <div>
+    使用`contentlayer/local-source`模块处理本地内容。
+    <ChevronLink label="完整的技术参考" url="/docs/reference/source-files" />
+  </div>
+  <div>
+    - <ChevronLink label="makeSource" url="/docs/reference/source-files/make-source" />
+    - <ChevronLink label="defineDocumentType" url="/docs/reference/source-files/define-document-type" />
+    - <ChevronLink label="defineNestedType" url="/docs/reference/source-files/define-nested-type" />
+    - <ChevronLink label="Field types reference" url="/docs/reference/source-files/field-types" />
+  </div>
+</div>

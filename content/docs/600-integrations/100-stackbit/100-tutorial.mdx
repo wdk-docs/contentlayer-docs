@@ -1,0 +1,112 @@
+---
+global_id: a5272b55
+title: Stackbit + Contentlayer Tutorial
+nav_title: 基本教程
+excerpt: 了解如何使用Stackbit和Contentlayer为Next.js应用程序添加可视化编辑。
+---
+
+我们可以通过一个简单的例子来演示它是如何工作的。在这个场景中，我们有一个`Page`模型，其中包含一个必需的`title`字段。
+
+内容位于`content/pages`目录中，我们希望使用每个页面的文件路径作为该页面的 URL 路径，我们将其存储在编译数据的计算`urlPath`属性中（通过 Contentlayer 构建过程）。
+
+让我们假设:
+
+- 内容存储在`content/pages`目录中的 Markdown 文件中。（请注意，此方法只支持文件源。）
+- 我们使用 Next.js 作为站点框架，这是对 Contentlayer 进行优化的主要框架。
+
+## 安装程序
+
+首先，确保依赖项已安装在项目中:
+
+```txt
+npm install contentlayer next-contentlayer @contentlayer/experimental-source-files-stackbit
+```
+
+## Stackbit 配置
+
+在 Stackbit 中，文档类型定义被称为*models*，并使用[`models'属性](https://docs.stackbit.com/reference/config/content-modeling/models)进行定义.
+
+一个简单的 Stackbit 配置可能看起来像这样:
+
+```ts
+// stackbit.config.ts
+
+import type * as Stackbit from '@stackbit/sdk'
+
+const stackbitConfig: Stackbit.RawConfig = {
+  stackbitVersion: '~0.6.0',
+  cmsName: 'git',
+  ssgName: 'nextjs',
+  nodeVersion: '16',
+  dataDir: 'content/data',
+  pagesDir: 'content/pages',
+  models: {
+    Page: {
+      type: 'page',
+      hideContent: true,
+      urlPath: '/{slug}',
+      fields: [
+        {
+          type: 'string',
+          name: 'title',
+          default: 'This is a new page',
+          required: true,
+        },
+      ],
+    },
+  },
+}
+
+export default stackbitConfig
+```
+
+<Callout>请注意，最佳实践通常会将`models`属性中的每个对象分解为单独的文件，但在此处结合使用是为了上下文。</Callout>
+
+## 扩展模型
+
+在 Contentlayer 配置文件中，我们可以导入 Stackbit 配置，然后添加我们计算的`urlPath`属性。
+
+```ts
+import { stackbitConfigToDocumentTypes } from '@contentlayer/experimental-source-files-stackbit'
+import stackbitConfig from './stackbit.config.js'
+
+const documentTypes = stackbitConfigToDocumentTypes(stackbitConfig, {
+  documentTypes: {
+    Page: {
+      computedFields: {
+        url: {
+          type: 'string',
+          resolve: (doc) => doc._raw.flattenedPath.replace(/^pages\/?/, '/'),
+        },
+      },
+    },
+  },
+})
+```
+
+<Callout>
+  请注意，我们不必定义`title`字段。我们也不必在模型上定义诸如`name`或`filePathPattern`之类的属性，因为它们已经由该函数推断出来了。
+</Callout>
+
+## 配置源
+
+在这一点上，我们已经拥有了调用`makeSource`并开始使用 Stackbit 配置中的 Contentlayer 构建输出所需的一切。
+
+```ts
+import { makeSource } from '@contentlayer/source-files'
+import { stackbitConfigToDocumentTypes } from '@contentlayer/experimental-source-files-stackbit'
+import stackbitConfig from './stackbit.config.js'
+
+const documentTypes = stackbitConfigToDocumentTypes(stackbitConfig, {
+  // document type extensions ...
+})
+
+export default makeSource({ contentDirPath: 'content', documentTypes })
+```
+
+现在，您可以通过在项目中运行`contentlayer build`来构建文件！
+
+<Callout>
+  当使用Next.js与`next dev`同步运行`contentlayer
+  dev`时，我们建议使用[`withContentlayer`](/docs/reference/next-contentlayer#withcontentlayer)。
+</Callout>

@@ -1,0 +1,81 @@
+---
+global_id: '' # Index page doesn't use a global ID
+title: 内容层文档
+nav_title: 文档
+excerpt: Contentlayer是一个内容预处理器，用于验证您的内容并将其转换为类型安全的JSON，您可以轻松地将其导入到应用程序中。
+---
+
+Contentlayer 是一个内容预处理器，用于验证您的内容并将其转换为类型安全的 JSON，您可以轻松地将其导入到应用程序中。
+
+<div className="mt-8 grid gap-6 md:grid-cols-2">
+  <Card
+    title="入门"
+    icon="rocket"
+    link={{ url: '/docs/getting-started', label: '跳进去' }}
+    subtitle="通过展示我们如何使用Next.js快速构建博客网站，了解Contentlayer的基本知识。"
+  />
+  <Card
+    title="概念"
+    icon="info"
+    link={{ url: '/docs/concepts', label: 'Learn more' }}
+    subtitle="了解为什么应该使用Contentlayer，并熟悉它在后台的工作方式。"
+  />
+</div>
+
+---
+
+## Sources
+
+<div className="grid gap-6 md:grid-cols-2 -mt-4">
+  <div>
+    Contentlayer允许您选择内容的来源。目前官方只支持本地文件源。
+    <ChevronLink label="See all guides" url="/docs/sources" />
+  </div>
+  <div>
+    支持、计划或正在考虑的来源:
+
+    - <ChevronLink label="Local Files" url="/docs/sources/files" />
+    - <ChevronLink label="Contentful" url="/docs/sources/contentful" />
+    - <ChevronLink label="Sanity" url="/docs/sources/sanity" />
+    - <ChevronLink label="Notion" url="/docs/sources/notion" />
+
+  </div>
+</div>
+
+---
+
+## Environments
+
+<div className="grid gap-6 md:grid-cols-2 -mt-4">
+  <div>
+    Contentlayer支持与Next.js紧密集成。其他环境支持即将到来。
+    <ChevronLink label="See all guides" url="/docs/environments" />
+
+  </div>
+  <div>
+    支持、计划或正在考虑的框架:
+
+    - <ChevronLink label="Local Files" url="/docs/environments/nextjs" />
+    - <ChevronLink label="Contentful" url="/docs/environments/remix" />
+    - <ChevronLink label="Sanity" url="/docs/environments/svelte" />
+    - <ChevronLink label="Notion" url="/docs/environments/astro" />
+
+  </div>
+</div>
+
+---
+
+## 参考
+
+<div className="grid gap-6 md:grid-cols-2 -mt-4">
+  <div>
+    Contentlayer、CLI和相关插件的API技术参考。
+    <ChevronLink label="See reference" url="/docs/reference" />
+
+  </div>
+  <div>
+    - <ChevronLink label="Contentlayer CLI" url="/docs/reference/cli" />
+    - <ChevronLink label="@contentlayer/source-files" url="/docs/reference/source-files" />
+    - <ChevronLink label="next-contentlayer" url="/docs/reference/next-contentlayer" />
+  </div>
+</div>

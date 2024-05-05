@@ -1,0 +1,179 @@
+---
+global_id: d747e46d
+title: 处理MDX文件
+nav_title: MDX
+excerpt: How Contentlayer processes MDX when using local files as the content source.
+---
+
+MDX 将 JSX 组件 Markdown，这可以为内容片段的主体区域提供强大的功能和灵活性。
+
+```md
+# Hello, World!
+
+This is my first MDX file. Here's a button element <button>Click me!</button>.
+
+<MyComponent />
+```
+
+## MDX 内容类型
+
+内容层通过[`mdx-bundler`](https://github.com/kentcdodds/mdx-bundler)支持 MDX 处理. 默认情况下，Contentlayer 将`.md`和`.mdx`文件的主要内容区域处理为 markdown。
+
+您可以通过在 Contentlayer 配置中将文档类型定义中的`contentType`选项设置为`'mdx'`来启用 MDX 处理。
+
+```js
+// contentlayer.config.ts
+const Post = defineDocumentType(() => ({
+  name: 'Post',
+  filePathPattern: `**/*.mdx`,
+  contentType: 'mdx',
+  fields: {
+    // ...
+  },
+}))
+```
+
+## Next.js 中的用法
+
+To parse the contents of a MDX file in a Next.js page, use the `useMDXComponent` hook provided by `next-contentlayer/hooks`.
+
+### 页面目录
+
+Here's an example implementation in Next.js using the legacy `/pages` directory:
+
+```tsx
+// pages/posts/[slug].tsx
+import { allPosts, type Post } from 'contentlayer/generated'
+import { useMDXComponent } from 'next-contentlayer/hooks'
+
+export async function getStaticPaths() {
+  // Get a list of valid post paths.
+  const paths = allPosts.map((post) => ({
+    params: { slug: post._raw.flattenedPath },
+  }))
+
+  return { paths, fallback: false }
+}
+
+export async function getStaticProps(context) {
+  // Find the post for the current page.
+  const post = allPosts.find((post) => post._raw.flattenedPath === context.params.slug)
+
+  // Return notFound if the post does not exist.
+  if (!post) return { notFound: true }
+
+  // Return the post as page props.
+  return { props: { post } }
+}
+
+export default function Page({ post }: { post: Post }) {
+  // Parse the MDX file via the useMDXComponent hook.
+  const MDXContent = useMDXComponent(post.body.code)
+
+  return (
+    <div>
+      {/* Some code ... */}
+      <MDXContent />
+    </div>
+  )
+}
+```
+
+In this example, the `getStaticPaths` function returns an array of all valid post slugs for pre-rendering and the `getStaticProps` function retrieves the relevant MDX post for the current page. The `useMDXComponent` hook then processes the MDX file via [`mdx-bundler`](https://github.com/kentcdodds/mdx-bundler). Finally, the rendered content is displayed using the `MDXContent` component returned by the `useMDXComponent` hook.
+
+### 应用程序目录
+
+以下是 Next.js 版本 13 及更高版本中使用新`/app`目录的示例实现：
+
+```tsx
+// app/posts/[slug]/page.tsx
+import { allPosts } from 'contentlayer/generated'
+import { useMDXComponent } from 'next-contentlayer/hooks'
+import { notFound } from 'next/navigation'
+
+export async function generateStaticParams() {
+  return allPosts.map((post) => ({
+    slug: post._raw.flattenedPath,
+  }))
+}
+
+export default async function Page({ params }: { params: { slug: string } }) {
+  // Find the post for the current page.
+  const post = allPosts.find((post) => post._raw.flattenedPath === params.slug)
+
+  // 404 if the post does not exist.
+  if (!post) notFound()
+
+  // Parse the MDX file via the useMDXComponent hook.
+  const MDXContent = useMDXComponent(post.body.code)
+
+  return (
+    <div>
+      {/* Some code ... */}
+      <MDXContent />
+    </div>
+  )
+}
+```
+
+In this example, the `generateStaticParams` function returns an array of all valid post slugs for pre-rendering. The `useMDXComponent` hook then processes the MDX file for the current page via [`mdx-bundler`](https://github.com/kentcdodds/mdx-bundler). Finally, the rendered content is displayed using the `MDXContent` component returned by the `useMDXComponent` hook.
+
+## 自定义 MDX 组件
+
+You can override built-in HTML elements and create your own custom React components using the `components` prop of the `MDXContent` component returned by the `useMDXComponent` hook.
+
+以下是一个示例实现：
+
+```tsx
+import { allPosts } from 'contentlayer/generated'
+import type { MDXComponents } from 'mdx/types'
+import { useMDXComponent } from 'next-contentlayer/hooks'
+import Link from 'next/link'
+
+// Define your custom MDX components.
+const mdxComponents: MDXComponents = {
+  // Override the default <a> element to use the next/link component.
+  a: ({ href, children }) => <Link href={href as string}>{children}</Link>,
+  // Add a custom component.
+  MyComponent: () => <div>Hello World!</div>,
+}
+
+export default async function Page({ params }: { params: { slug: string } }) {
+  // Find the post for the current page.
+  const post = allPosts.find((post) => post._raw.flattenedPath === params.slug)
+
+  // 404 if the post does not exist.
+  if (!post) notFound()
+
+  // Parse the MDX file via the useMDXComponent hook.
+  const MDXContent = useMDXComponent(post.body.code)
+
+  return (
+    <div>
+      {/* Some code ... */}
+      <MDXContent components={mdxComponents} /> {/* <= Include your custom MDX components here */}
+    </div>
+  )
+}
+```
+
+In this example, we define a custom `mdxComponents` object that overrides the default `<a>` element to use the `next/link` component and adds a custom `MyComponent` component. Then, we include our custom components by passing the `mdxComponents` object to the `components` prop of the `MDXContent` component.
+
+## MDX 插件 (remark/rehype)
+
+你可以添加[remark](https://github.com/remarkjs/remark)和[rehype](https://github.com/rehypejs/rehype)在 Contentlayer 配置中调用`makeSource`时，`mdx`属性内的插件。
+
+```js
+// contentlayer.config.ts
+import { makeSource } from '@contentlayer/source-files'
+import highlight from 'rehype-highlight'
+import remarkGfm from 'remark-gfm'
+
+export default makeSource({
+  // ...
+  mdx: {
+    remarkPlugins: [remarkGfm],
+    rehypePlugins: [highlight],
+  },
+})
+```

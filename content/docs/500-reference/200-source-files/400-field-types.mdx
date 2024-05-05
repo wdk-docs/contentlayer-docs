@@ -1,0 +1,453 @@
+---
+global_id: defe41e9
+title: Field Types Reference
+nav_title: Field Types
+excerpt: Technical reference for field types when using the local files content source.
+---
+
+字段定义指定内容的预期形状和行为。它们告诉 Contentlayer 如何将内容对象中的每个属性解析为应用程序可以使用的数据。
+
+所有字段共享相同的基本选项，而根据字段类型，其他选项也可用。有关详细信息，请参见下文。
+
+## 共享选项
+
+字段的名称被定义为定义对象的键（请参见示例）。所有字段定义都有以下可用选项：
+
+- `type` (`string`, required): 类型的名称。
+- `required` (`boolean`, default: `false`): 在分析内容时是否验证字段的存在。
+- `description` (`string`): 向编辑器简要描述如何使用字段。
+
+然后，字段类型指示所有其他可用选项。查看下面的详细信息。
+
+**实例:**
+
+这是一个类型定义，它定义了一个名称为`title`、类型为`string`的字段，这是不需要的。
+
+```js
+defineDocumentType(() => ({
+  // ...
+  fields: {
+    title: { type: 'string' },
+  },
+}))
+```
+
+## `boolean`
+
+布尔字段可以具有`true`或`false`值。
+
+**选项:**
+
+- `default` (`string`): 字段为空时的默认值。
+
+**实例:**
+
+```js
+defineDocumentType(() => ({
+  // ...
+  fields: {
+    isActive: {
+      type: 'boolean',
+      default: false,
+    },
+  },
+}))
+```
+
+## `date`
+
+日期字段返回一个`Date`实例。
+
+**Options:**
+
+- `default` (`string`): 字段为空时的默认值。
+
+**实例:**
+
+```js
+defineDocumentType(() => ({
+  // ...
+  fields: {
+    publishAt: {
+      type: 'date',
+    },
+  },
+}))
+```
+
+## `enum`
+
+枚举是一个专门的字符串字段，其中的字符串必须与定义的选项之一匹配。
+
+**选项:**
+
+- `default` (`string`): 字段为空时的默认值。
+- `options` (`string[]`): 字段的一组可接受选项。
+
+**实例:**
+
+```js
+defineDocumentType(() => ({
+  // ...
+  fields: {
+    theme: {
+      type: 'enum',
+      options: ['light', 'dark'],
+      default: 'dark',
+    },
+  },
+}))
+```
+
+## `json`
+
+JSON 字段是开放的，可以存储任何有效 JSON 结构的数据。
+
+**Options:**
+
+- `default` (`string`): 字段为空时的默认值。
+
+**实例:**
+
+```js
+defineDocumentType(() => ({
+  // ...
+  fields: {
+    options: {
+      type: 'json',
+    },
+  },
+}))
+```
+
+## `list`
+
+列表是一个值数组，可以是字符串，也可以是嵌套对象。
+
+**选项:**
+
+- `default` (`array`): 默认值的列表。
+- `of` (`NestedType`): 嵌套的文档类型定义。[了解有关嵌套类型的详细信息](/docs/reference/source-files/define-nested-type).
+
+**实例:**
+
+```js
+defineDocumentType(() => ({
+  // ...
+  fields: {
+    tags: {
+      type: 'list',
+      of: { type: 'string' },
+    },
+  },
+}))
+```
+
+默认列表类型需要一个字符串数组，如下所示:
+
+```yaml
+---
+tags:
+  - My First Tag
+  - Another Tag
+---
+```
+
+### 嵌套对象列表
+
+要指定嵌套对象的列表，请使用`of`选项。这里有一个定义的例子:
+
+```js
+const Tag = defineNestedType(() => ({
+  name: 'Tag',
+  fields: {
+    title: { type: 'string', required: true },
+  },
+}))
+
+defineDocumentType(() => ({
+  // ...
+  fields: {
+    // ...
+    tags: {
+      type: 'list',
+      of: Tag,
+    },
+  },
+}))
+```
+
+现在，您可以在内容文件中使用嵌套对象。
+
+```yaml
+---
+tags:
+  - title: My First Tag
+  - title: Another Tag
+---
+```
+
+## `markdown`
+
+给定一个 markdown 字符串，这将创建一个包含以下属性的对象:
+
+- `raw`: 内容文件中的输入字符串。
+- `html`: 输出要在组件中使用的 HTML。
+
+**选项:**
+
+- `default` (`string`): 字段为空时的默认值。
+
+**实例:**
+
+```js
+defineDocumentType(() => ({
+  // ...
+  fields: {
+    // ...
+    description: {
+      type: 'markdown',
+    },
+  },
+}))
+```
+
+如果您的内容文件具有以下内容:
+
+```yaml
+---
+description: Hello world
+---
+```
+
+结果会是这样的:
+
+```json
+{
+  "description": {
+    "raw": "Hello world",
+    "html": "<p>Hello world</p>"
+  }
+}
+```
+
+## `mdx`
+
+给定一个 MDX 字符串，这将创建一个包含以下属性的对象:
+
+- `raw`: 内容文件中的输入字符串。
+- `code`: 输出可以加载到组件中的 JavaScript 代码。
+
+**选项:**
+
+- `default` (`string`): 字段为空时的默认值。
+
+**实例:**
+
+```js
+defineDocumentType(() => ({
+  // ...
+  fields: {
+    description: {
+      type: 'mdx',
+    },
+  },
+}))
+```
+
+如果您的内容文件具有以下内容:
+
+```yaml
+---
+description: Hello world
+---
+```
+
+结果会是这样的:
+
+```json
+{
+  "description": {
+    "raw": "Hello world",
+    "code": "var Component=(()=>{var m=Object.create ..."
+  }
+}
+```
+
+## `nested`
+
+嵌套字段是一个直接嵌入的对象，它必须与用`of`选项声明的一个或多个类型的形状相匹配。
+
+**Options:**
+
+- `default` (`string`): 字段为空时的默认值。
+- `of` (`NestedType` or `[NestedType]`): 嵌套的文档类型定义。[了解有关嵌套类型的详细信息](./define-nested-type).
+
+**实例:**
+
+```js
+const Category = defineNestedType(() => ({
+  name: 'Category',
+  fields: {
+    title: { type: 'string', required: true },
+  },
+}))
+
+defineDocumentType(() => ({
+  // ...
+  fields: {
+    category: {
+      type: 'nested',
+      of: Category,
+    },
+  },
+}))
+```
+
+内容的形状将如下所示：
+
+```yaml
+---
+category:
+  title: Sportsball
+---
+```
+
+这将生成一个文档，其中`category`是具有`title`属性的嵌入`object`。
+
+```json
+{
+  "category": {
+    "title": "Sportsball"
+  }
+}
+```
+
+### 多边形嵌套对象
+
+通过将嵌套类型数组传递给`of`选项，可以指定多个嵌套字段类型。
+
+```js
+const Tag = defineNestedType(() => ({
+  name: 'Tag',
+  fields: {
+    title: { type: 'string', required: true },
+  },
+}))
+
+const Category = defineNestedType(() => ({
+  name: 'Category',
+  fields: {
+    title: { type: 'string', required: true },
+  },
+}))
+
+defineDocumentType(() => ({
+  // ...
+  fields: {
+    category: {
+      type: 'nested',
+      of: [Category, Tag],
+    },
+  },
+}))
+```
+
+这要求您使用`type`属性指定内容中对象的类型。
+
+```yaml
+---
+category:
+  type: Tag
+  title: Hello World
+---
+```
+
+## `number`
+
+**选项:**
+
+- `default` (`string`): 字段为空时的默认值。
+
+**实例:**
+
+```js
+defineDocumentType(() => ({
+  // ...
+  fields: {
+    count: {
+      type: 'number',
+      default: 0,
+    },
+  },
+}))
+```
+
+## `reference`
+
+特定类型的另一个文档文件的路径。路径应相对于传递给[`makeSource`](./make-source)的`contentDirPath`选项.
+
+<Callout>引用当前未转换或嵌入。它们只是作为字符串传递。</Callout>
+
+**选项:**
+
+- `default` (`string`): 字段为空时的默认值。
+- `of` (`DocumentType`): 文档类型定义。
+
+**实例:**
+
+```js
+const Category = defineNestedType(() => ({
+  name: 'Category',
+  filePathPattern: 'categories/*.md',
+  fields: {
+    title: { type: 'string', required: true },
+  },
+}))
+
+defineDocumentType(() => ({
+  // ...
+  fields: {
+    category: {
+      type: 'reference',
+      of: Category,
+    },
+  },
+}))
+```
+
+然后，您的内容文件将使用相对于传递给`makeSource`的`contentDirPath`选项的路径指向引用的文档。
+
+```yaml
+---
+category: categories/hello-world.md
+---
+```
+
+这在此时的输出文档中显示为原样。
+
+```json
+{
+  "category": "categories/hello-world.md"
+}
+```
+
+## `string`
+
+**选项:**
+
+- `default` (`string`): 字段为空时的默认值。
+
+**实例:**
+
+```js
+defineDocumentType(() => ({
+  // ...
+  fields: {
+    title: {
+      type: 'string',
+      required: true,
+    },
+  },
+}))
+```
